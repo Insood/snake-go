@@ -7,32 +7,32 @@ import (
 )
 
 const (
-	gridRows              = int32(10)
-	gridColumns           = int32(10)
-	maxCells              = int32(gridRows * gridColumns)
-	gridThickness         = int32(2)
-	gridSize              = int32(25)
-	gridBorder            = int32(10)
-	screenWidth           = gridColumns*gridSize + (gridColumns+1)*gridThickness + 2*gridBorder
-	screenHeight          = gridRows*gridSize + (gridRows+1)*gridThickness + 2*gridBorder
-	splashScreenGrid      = 10
-	splashScreenGridSize  = int32(splashScreenGrid * gridSize)
-	splashScreenGridCols  = int32(16)
-	splashScreenGridRows  = int32(16)
-	splashScreenGridCount = int32(2*splashScreenGridCols + 2*splashScreenGridRows - 4)
-	startingSpeed         = int32(22)
-	maxSpeed              = int32(5)
+	GridRows              = int32(10)
+	GridColumns           = int32(10)
+	MaxCells              = int32(GridRows * GridColumns)
+	GridThickness         = int32(2)
+	GridSize              = int32(25)
+	GridBroder            = int32(10)
+	ScreenWidth           = GridColumns*GridSize + (GridColumns+1)*GridThickness + 2*GridBroder
+	ScreenHeight          = GridRows*GridSize + (GridRows+1)*GridThickness + 2*GridBroder
+	SplashScreenGrid      = 10
+	SplashScreenGridSize  = int32(SplashScreenGrid * GridSize)
+	SplashScreenGridCols  = int32(16)
+	SplashScreenGridRows  = int32(16)
+	SplashScreenGridCount = int32(2*SplashScreenGridCols + 2*SplashScreenGridRows - 4)
+	StartingSpeed         = int32(22)
+	MaxSpeed              = int32(5)
 )
 
 var (
-	gridColor           = raylib.NewColor(218, 223, 225, 255)
-	foodColor           = raylib.NewColor(255, 0, 0, 255)
-	snakeHeadColorStart = raylib.NewColor(81, 134, 236, 255)
-	snakeHeadColorEnd   = raylib.NewColor(200, 200, 200, 255)
+	GridColor           = raylib.NewColor(218, 223, 225, 255)
+	FoodColor           = raylib.NewColor(255, 0, 0, 255)
+	SnakeHeadColorStart = raylib.NewColor(81, 134, 236, 255)
+	SnakeHeadColorEnd   = raylib.NewColor(200, 200, 200, 255)
 
-	foreground = raylib.NewColor(0, 68, 130, 255)
-	background = raylib.NewColor(255, 255, 255, 255)
-	gray       = raylib.NewColor(128, 128, 128, 255)
+	Foreground = raylib.NewColor(0, 68, 130, 255)
+	Background = raylib.NewColor(255, 255, 255, 255)
+	Gray       = raylib.NewColor(128, 128, 128, 255)
 
 	Up    = raylib.NewVector2(0, -1)
 	Down  = raylib.NewVector2(0, 1)
@@ -59,9 +59,9 @@ type Game struct {
 }
 
 func InitializeGame(game *Game) {
-	game.Snake = []raylib.Vector2{{X: float32(gridColumns) / 2, Y: float32(gridRows) / 2}}
+	game.Snake = []raylib.Vector2{{X: float32(GridColumns) / 2, Y: float32(GridRows) / 2}}
 	game.Direction = raylib.NewVector2(1, 0)
-	game.Speed = startingSpeed
+	game.Speed = StartingSpeed
 	game.Ticks = 0
 	game.State = GAME
 	PlaceFood(game)
@@ -85,57 +85,57 @@ func UpdateSplashScreenState(game *Game) {
 
 func DrawSplashScreen(game *Game) {
 	raylib.BeginDrawing()
-	raylib.ClearBackground(background)
+	raylib.ClearBackground(Background)
 
-	upperLeftX := screenWidth/2 - splashScreenGridCols/2*splashScreenGridSize
-	upperLeftY := screenHeight/2 - splashScreenGridRows/2*splashScreenGridSize
-
-	raylib.DrawRectangle(
-		upperLeftX,
-		upperLeftY,
-		splashScreenGridCols*splashScreenGridSize,
-		splashScreenGridRows*splashScreenGridSize,
-		foreground,
-	)
+	upperLeftX := ScreenWidth/2 - (SplashScreenGridCols/2)*SplashScreenGridSize
+	upperLeftY := ScreenHeight/2 - (SplashScreenGridRows/2)*SplashScreenGridSize
 
 	// raylib.DrawRectangle(
-	// 	screenWidth/2-splashScreenGridCols/2*splashScreenGridSize+splashScreenGridSize,
-	// 	screenHeight/2-splashScreenGridRows/2*splashScreenGridSize+splashScreenGridSize,
-	// 	(splashScreenGridCols-2)*splashScreenGridSize,
-	// 	(splashScreenGridRows-2)*splashScreenGridSize,
-	// 	background,
+	// 	upperLeftX,
+	// 	upperLeftY,
+	// 	SplashScreenGridCols*SplashScreenGridSize,
+	// 	SplashScreenGridRows*SplashScreenGridSize,
+	// 	Foreground,
 	// )
 
-	// for i := int32(0); i < 6; i++ {
-	// 	snakeOffset := (game.Ticks/5 + i) % splashScreenGridCount
-	// 	gridPosition := GetOuroborosPosition(snakeOffset)
-	// 	raylib.DrawRectangle(
-	// 		upperLeftX+int32(gridPosition.X)*splashScreenGridSize+1,
-	// 		upperLeftY+int32(gridPosition.Y)*splashScreenGridSize+1,
-	// 		splashScreenGridSize-2,
-	// 		splashScreenGridSize-2,
-	// 		background,
-	// 	)
-	// }
+	// // raylib.DrawRectangle(
+	// // 	ScreenWidth/2-SplashScreenGridCols/2*SplashScreenGridSize+SplashScreenGridSize,
+	// // 	ScreenHeight/2-SplashScreenGridRows/2*SplashScreenGridSize+SplashScreenGridSize,
+	// // 	(SplashScreenGridCols-2)*SplashScreenGridSize,
+	// // 	(SplashScreenGridRows-2)*SplashScreenGridSize,
+	// // 	Background,
+	// // )
+
+	for i := int32(0); i < 6; i++ {
+		snakeOffset := (game.Ticks/5 + i) % SplashScreenGridCount
+		gridPosition := GetOuroborosPosition(snakeOffset)
+		raylib.DrawRectangle(
+			upperLeftX+int32(gridPosition.X)*SplashScreenGridSize+1,
+			upperLeftY+int32(gridPosition.Y)*SplashScreenGridSize+1,
+			SplashScreenGridSize-2,
+			SplashScreenGridSize-2,
+			Background,
+		)
+	}
 
 	startText := "Press Space to Start"
 	textWidth := raylib.MeasureText(startText, 20)
 
-	raylib.DrawText("snek", 134, 182, 30, foreground)
-	raylib.DrawText(startText, screenWidth/2-textWidth/2, 255, 20, gray)
+	raylib.DrawText("snek", 134, 182, 30, Foreground)
+	raylib.DrawText(startText, ScreenWidth/2-textWidth/2, 255, 20, Gray)
 
 	raylib.EndDrawing()
 }
 
 func GetOuroborosPosition(i int32) raylib.Vector2 {
-	if i < splashScreenGridCols {
+	if i < SplashScreenGridCols {
 		return raylib.NewVector2(float32(i), 0.0)
-	} else if i < splashScreenGridCols+splashScreenGridRows-1 {
-		return raylib.NewVector2(float32(splashScreenGridCols-1), float32(i-splashScreenGridCols+1))
-	} else if i < 2*splashScreenGridCols+splashScreenGridRows-2 {
-		return raylib.NewVector2(float32(2*splashScreenGridCols+splashScreenGridRows-3-i), float32(splashScreenGridRows-1))
+	} else if i < SplashScreenGridCols+SplashScreenGridRows-1 {
+		return raylib.NewVector2(float32(SplashScreenGridCols-1), float32(i-SplashScreenGridCols+1))
+	} else if i < 2*SplashScreenGridCols+SplashScreenGridRows-2 {
+		return raylib.NewVector2(float32(2*SplashScreenGridCols+SplashScreenGridRows-3-i), float32(SplashScreenGridRows-1))
 	} else {
-		return raylib.NewVector2(0.0, float32(2*splashScreenGridCols+2*splashScreenGridRows-4-i))
+		return raylib.NewVector2(0.0, float32(2*SplashScreenGridCols+2*SplashScreenGridRows-4-i))
 	}
 }
 
@@ -147,51 +147,51 @@ func GameScreen(game *Game) {
 
 func DrawGrid() {
 	// Columns
-	for col := int32(0); col <= gridColumns; col++ {
+	for col := int32(0); col <= GridColumns; col++ {
 		raylib.DrawRectangle(
-			gridBorder+col*(gridSize+gridThickness),
-			gridBorder,
-			gridThickness,
-			screenHeight-gridBorder*2,
-			gridColor,
+			GridBroder+col*(GridSize+GridThickness),
+			GridBroder,
+			GridThickness,
+			ScreenHeight-GridBroder*2,
+			GridColor,
 		)
 	}
 
 	// Rows
-	for row := int32(0); row <= gridRows; row++ {
+	for row := int32(0); row <= GridRows; row++ {
 		raylib.DrawRectangle(
-			gridBorder,
-			gridBorder+row*(gridSize+gridThickness),
-			screenWidth-gridBorder*2,
-			gridThickness,
-			gridColor,
+			GridBroder,
+			GridBroder+row*(GridSize+GridThickness),
+			ScreenWidth-GridBroder*2,
+			GridThickness,
+			GridColor,
 		)
 	}
 }
 
 func DrawBox(position raylib.Vector2, color raylib.Color) {
 	raylib.DrawRectangle(
-		gridBorder+gridThickness+int32(position.X)*(gridSize+gridThickness),
-		gridBorder+gridThickness+int32(position.Y)*(gridSize+gridThickness),
-		gridSize,
-		gridSize,
+		GridBroder+GridThickness+int32(position.X)*(GridSize+GridThickness),
+		GridBroder+GridThickness+int32(position.Y)*(GridSize+GridThickness),
+		GridSize,
+		GridSize,
 		color,
 	)
 }
 
 func DrawSnake(game *Game) {
 	for i, segment := range game.Snake {
-		segmentColor := raylib.ColorLerp(snakeHeadColorStart, snakeHeadColorEnd, float32(i)/float32(maxCells))
+		segmentColor := raylib.ColorLerp(SnakeHeadColorStart, SnakeHeadColorEnd, float32(i)/float32(MaxCells))
 		DrawBox(segment, segmentColor)
 	}
 }
 
 func DrawGameScreen(game *Game) {
 	raylib.BeginDrawing()
-	raylib.ClearBackground(background)
+	raylib.ClearBackground(Background)
 	DrawGrid()
 	DrawSnake(game)
-	DrawBox(game.Food, foodColor)
+	DrawBox(game.Food, FoodColor)
 	raylib.EndDrawing()
 }
 
@@ -219,8 +219,8 @@ func CheckCollision(position raylib.Vector2, game *Game) bool {
 
 func PlaceFood(game *Game) {
 	for {
-		col := float32(rand.Intn(int(gridColumns)))
-		row := float32(rand.Intn(int(gridRows)))
+		col := float32(rand.Intn(int(GridColumns)))
+		row := float32(rand.Intn(int(GridRows)))
 
 		foodPosition := raylib.NewVector2(col, row)
 
@@ -255,8 +255,8 @@ func UpdateGameState(game *Game) {
 	if nextPosition == game.Food {
 		game.Snake = append([]raylib.Vector2{nextPosition}, game.Snake...)
 		PlaceFood(game)
-		game.Speed = startingSpeed - int32(float32(len(game.Snake)*1.0)/float32(maxCells)*float32(startingSpeed-maxSpeed))
-	} else if nextPosition.X < 0 || nextPosition.X >= float32(gridColumns) || nextPosition.Y < 0 || nextPosition.Y >= float32(gridRows) || CheckCollision(nextPosition, game) {
+		game.Speed = StartingSpeed - int32(float32(len(game.Snake)*1.0)/float32(MaxCells)*float32(StartingSpeed-MaxSpeed))
+	} else if nextPosition.X < 0 || nextPosition.X >= float32(GridColumns) || nextPosition.Y < 0 || nextPosition.Y >= float32(GridRows) || CheckCollision(nextPosition, game) {
 		game.State = GAME_OVER
 	} else {
 		game.Snake = append([]raylib.Vector2{nextPosition}, game.Snake...)
@@ -277,18 +277,18 @@ func ReadGameOverInputs(game *Game) {
 
 func DrawGameOverScreen(game *Game) {
 	raylib.BeginDrawing()
-	raylib.ClearBackground(background)
+	raylib.ClearBackground(Background)
 
 	startText := "Press Space to Restart"
 	textWidth := raylib.MeasureText(startText, 20)
 
-	raylib.DrawText(startText, screenWidth/2-textWidth/2, 255, 20, gray)
+	raylib.DrawText(startText, ScreenWidth/2-textWidth/2, 255, 20, Gray)
 
 	raylib.EndDrawing()
 }
 
 func main() {
-	raylib.InitWindow(screenWidth, screenHeight, "Snek")
+	raylib.InitWindow(ScreenWidth, ScreenHeight, "Snek")
 	defer raylib.CloseWindow()
 
 	raylib.SetTargetFPS(60)
