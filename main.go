@@ -16,7 +16,7 @@ const (
 	ScreenWidth           = GridColumns*GridSize + (GridColumns+1)*GridThickness + 2*GridBroder
 	ScreenHeight          = GridRows*GridSize + (GridRows+1)*GridThickness + 2*GridBroder
 	SplashScreenGrid      = 10
-	SplashScreenGridSize  = int32(SplashScreenGrid * GridSize)
+	SplashScreenGridSize  = int32(10)
 	SplashScreenGridCols  = int32(16)
 	SplashScreenGridRows  = int32(16)
 	SplashScreenGridCount = int32(2*SplashScreenGridCols + 2*SplashScreenGridRows - 4)
@@ -90,21 +90,21 @@ func DrawSplashScreen(game *Game) {
 	upperLeftX := ScreenWidth/2 - (SplashScreenGridCols/2)*SplashScreenGridSize
 	upperLeftY := ScreenHeight/2 - (SplashScreenGridRows/2)*SplashScreenGridSize
 
-	// raylib.DrawRectangle(
-	// 	upperLeftX,
-	// 	upperLeftY,
-	// 	SplashScreenGridCols*SplashScreenGridSize,
-	// 	SplashScreenGridRows*SplashScreenGridSize,
-	// 	Foreground,
-	// )
+	raylib.DrawRectangle(
+		upperLeftX,
+		upperLeftY,
+		SplashScreenGridCols*SplashScreenGridSize,
+		SplashScreenGridRows*SplashScreenGridSize,
+		Foreground,
+	)
 
-	// // raylib.DrawRectangle(
-	// // 	ScreenWidth/2-SplashScreenGridCols/2*SplashScreenGridSize+SplashScreenGridSize,
-	// // 	ScreenHeight/2-SplashScreenGridRows/2*SplashScreenGridSize+SplashScreenGridSize,
-	// // 	(SplashScreenGridCols-2)*SplashScreenGridSize,
-	// // 	(SplashScreenGridRows-2)*SplashScreenGridSize,
-	// // 	Background,
-	// // )
+	raylib.DrawRectangle(
+		ScreenWidth/2-SplashScreenGridCols/2*SplashScreenGridSize+SplashScreenGridSize,
+		ScreenHeight/2-SplashScreenGridRows/2*SplashScreenGridSize+SplashScreenGridSize,
+		(SplashScreenGridCols-2)*SplashScreenGridSize,
+		(SplashScreenGridRows-2)*SplashScreenGridSize,
+		Background,
+	)
 
 	for i := int32(0); i < 6; i++ {
 		snakeOffset := (game.Ticks/5 + i) % SplashScreenGridCount
