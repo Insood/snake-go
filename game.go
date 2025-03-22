@@ -9,8 +9,8 @@ import (
 const (
 	MaxCells = int32(GridRows * GridColumns)
 
-	StartingSpeed = int32(22)
-	MaxSpeed      = int32(5)
+	StartingSpeed = int64(22)
+	MaxSpeed      = int64(5)
 )
 
 var (
@@ -18,26 +18,64 @@ var (
 	FoodColor           = raylib.NewColor(255, 0, 0, 255)
 	SnakeHeadColorStart = raylib.NewColor(81, 134, 236, 255)
 	SnakeHeadColorEnd   = raylib.NewColor(200, 200, 200, 255)
-
-	Up    = raylib.NewVector2(0, -1)
-	Down  = raylib.NewVector2(0, 1)
-	Left  = raylib.NewVector2(-1, 0)
-	Right = raylib.NewVector2(1, 0)
 )
 
-func InitializeGame(game *Game) {
-	game.Snake = []raylib.Vector2{{X: float32(GridColumns) / 2, Y: float32(GridRows) / 2}}
-	game.Direction = raylib.NewVector2(1, 0)
-	game.Speed = StartingSpeed
-	game.Ticks = 0
-	game.State = GAME
-	PlaceFood(game)
+func NewSnake(world *World) {
+	id := world.AllocateID()
+	pos := NewPosition(float32(GridColumns)/2, float32(GridRows)/2)
+	dir := NewMovement(StartingSpeed, 1, 0)
+	color := NewColor(SnakeHeadColorStart)
+	head := NewHead()
+	segment := NewSegment()
+
+	world.AddComponent(id, pos)
+	world.AddComponent(id, dir)
+	world.AddComponent(id, color)
+	world.AddComponent(id, head)
+	world.AddComponent(id, segment)
 }
 
-func GameScreen(game *Game) {
-	ReadGameInputs(game)
-	DrawGameScreen(game)
-	UpdateGameState(game)
+func CreateFood(world *World) {
+	id := world.AllocateID()
+	foodColor := NewColor(FoodColor)
+	pos := FindEmptySpot(world)
+	food := NewFood()
+
+	world.AddComponent(id, food)
+	world.AddComponent(id, pos)
+	world.AddComponent(id, foodColor)
+}
+
+func CreateSegment(world *World, X float32, Y float32, segmentCount int) ID {
+	id := world.AllocateID()
+	pos := NewPosition(X, Y)
+
+	segmentColor := raylib.ColorLerp(SnakeHeadColorStart, SnakeHeadColorEnd, float32(segmentCount)*1.0/float32(MaxCells))
+
+	color := NewColor(segmentColor)
+	segment := NewSegment()
+	world.AddComponent(id, pos)
+	world.AddComponent(id, color)
+	world.AddComponent(id, segment)
+	return id
+}
+
+func InitializeGame(world *World) {
+	world.Nuke()
+	world.State = GAME
+
+	NewSnake(world)
+	CreateFood(world)
+
+	world.State = GAME
+	world.AddSystem(InputSystem{})
+	world.AddSystem(SnakeCollisionSystem{})
+	world.AddSystem(GameDrawingSystem{})
+	world.AddSystem(SegmentUpdateSystem{})
+}
+
+func GameScreen(world *World) {
+	world.UpdateSystems()
 }
 
 func DrawGrid() {
@@ -74,87 +112,66 @@ func DrawBox(position raylib.Vector2, color raylib.Color) {
 	)
 }
 
-func DrawSnake(game *Game) {
-	for i, segment := range game.Snake {
-		segmentColor := raylib.ColorLerp(SnakeHeadColorStart, SnakeHeadColorEnd, float32(i)/float32(MaxCells))
-		DrawBox(segment, segmentColor)
-	}
-}
+func CheckCollision(world *World, headID ID) bool {
+	positions := *ComponentsOfType[Position](world)
+	headX := positions[headID].(*Position).X
+	headY := positions[headID].(*Position).Y
+	collision := false
 
-func DrawGameScreen(game *Game) {
-	raylib.BeginDrawing()
-	raylib.ClearBackground(Background)
-	DrawGrid()
-	DrawSnake(game)
-	DrawBox(game.Food, FoodColor)
-	raylib.EndDrawing()
-}
-
-func ReadGameInputs(game *Game) {
-	if raylib.IsKeyPressed(raylib.KeyUp) {
-		game.LastInput = Up
-	} else if raylib.IsKeyPressed(raylib.KeyDown) && game.Direction != Up {
-		game.LastInput = Down
-	} else if raylib.IsKeyPressed(raylib.KeyLeft) && game.Direction != Right {
-		game.LastInput = Left
-	} else if raylib.IsKeyPressed(raylib.KeyRight) && game.Direction != Left {
-		game.LastInput = Right
-	}
-}
-
-func CheckCollision(position raylib.Vector2, game *Game) bool {
-	for _, segment := range game.Snake {
-		if segment.X == position.X && segment.Y == position.Y {
-			return true
+	Map2(world, func(componentID ID, segment *Segment, position *Position) {
+		if componentID != headID && position.X == headX && position.Y == headY {
+			collision = true
 		}
-	}
-
-	return false
+	})
+	return collision
 }
 
-func PlaceFood(game *Game) {
+func FindEmptySpot(world *World) *Position {
+	positions := *ComponentsOfType[Position](world)
+
 	for {
-		col := float32(rand.Intn(int(GridColumns)))
-		row := float32(rand.Intn(int(GridRows)))
+		X := float32(rand.Intn(int(GridColumns)))
+		Y := float32(rand.Intn(int(GridRows)))
 
-		foodPosition := raylib.NewVector2(col, row)
+		overlap := false
 
-		if !CheckCollision(foodPosition, game) {
-			game.Food = foodPosition
-			return
+		for _, occupied_position := range positions {
+			occupied_position := occupied_position.(*Position)
+
+			if occupied_position.X == X && occupied_position.Y == Y {
+				overlap = true
+				break
+			}
+		}
+
+		if !overlap {
+			return NewPosition(X, Y)
 		}
 	}
 }
 
-func UpdateGameState(game *Game) {
-	game.Ticks++
+// Find the last segment of the snake and then get that segment's last position
+// This is the position where we want to insert an additional segment
+func ExtendSnake(world *World, headID ID) {
+	segments := *ComponentsOfType[Segment](world)
 
-	if game.Ticks < game.Speed {
-		return
-	}
+	segmentID := headID
 
-	if game.LastInput == Left && game.Direction != Right {
-		game.Direction = Left
-	} else if game.LastInput == Right && game.Direction != Left {
-		game.Direction = Right
-	} else if game.LastInput == Up && game.Direction != Down {
-		game.Direction = Up
-	} else if game.LastInput == Down && game.Direction != Up {
-		game.Direction = Down
-	}
+	count := 0
+	for {
+		count += 1
+		thisSegment := segments[segmentID].(*Segment)
 
-	game.Ticks = 0
+		if thisSegment.NextSegmentID < 0 {
+			X := thisSegment.LastX
+			Y := thisSegment.LastY
 
-	nextPosition := raylib.Vector2Add(game.Snake[0], game.Direction)
+			id := CreateSegment(world, X, Y, count)
+			thisSegment.NextSegmentID = id
 
-	if nextPosition == game.Food {
-		game.Snake = append([]raylib.Vector2{nextPosition}, game.Snake...)
-		PlaceFood(game)
-		game.Speed = StartingSpeed - int32(float32(len(game.Snake)*1.0)/float32(MaxCells)*float32(StartingSpeed-MaxSpeed))
-	} else if nextPosition.X < 0 || nextPosition.X >= float32(GridColumns) || nextPosition.Y < 0 || nextPosition.Y >= float32(GridRows) || CheckCollision(nextPosition, game) {
-		game.State = GAME_OVER
-	} else {
-		game.Snake = append([]raylib.Vector2{nextPosition}, game.Snake...)
-		game.Snake = game.Snake[:len(game.Snake)-1]
+			break
+		}
+
+		segmentID = thisSegment.NextSegmentID
 	}
 }

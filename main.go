@@ -19,40 +19,23 @@ var (
 	Gray       = raylib.NewColor(128, 128, 128, 255)
 )
 
-type GameState int
-
-const (
-	SPLASH_SCREEN GameState = iota
-	GAME
-	GAME_OVER
-)
-
-type Game struct {
-	Snake     []raylib.Vector2
-	Direction raylib.Vector2
-	LastInput raylib.Vector2
-	Food      raylib.Vector2
-	Speed     int32
-	Ticks     int32
-	State     GameState
-}
-
 func main() {
 	raylib.InitWindow(ScreenWidth, ScreenHeight, "Snek")
 	defer raylib.CloseWindow()
 
 	raylib.SetTargetFPS(60)
 
-	game := Game{}
-	game.State = SPLASH_SCREEN
+	world := NewWorld()
 
 	for !raylib.WindowShouldClose() {
-		if game.State == SPLASH_SCREEN {
-			SplashScreen(&game)
-		} else if game.State == GAME {
-			GameScreen(&game)
-		} else if game.State == GAME_OVER {
-			GameOverScreen(&game)
+		if world.State == SPLASH_SCREEN {
+			SplashScreen(world)
+		} else if world.State == GAME {
+			GameScreen(world)
+		} else if world.State == GAME_OVER {
+			GameOverScreen(world)
 		}
+
+		world.Ticks += 1
 	}
 }

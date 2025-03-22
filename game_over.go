@@ -2,18 +2,18 @@ package main
 
 import raylib "github.com/gen2brain/raylib-go/raylib"
 
-func GameOverScreen(game *Game) {
-	ReadGameOverInputs(game)
-	DrawGameOverScreen(game)
+func GameOverScreen(world *World) {
+	ReadGameOverInputs(world)
+	DrawGameOverScreen(world)
 }
 
-func ReadGameOverInputs(game *Game) {
+func ReadGameOverInputs(world *World) {
 	if raylib.IsKeyPressed(raylib.KeySpace) {
-		game.State = SPLASH_SCREEN
+		world.State = SPLASH_SCREEN
 	}
 }
 
-func DrawGameOverScreen(game *Game) {
+func DrawGameOverScreen(world *World) {
 	raylib.BeginDrawing()
 	raylib.ClearBackground(Background)
 

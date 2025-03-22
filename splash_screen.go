@@ -14,23 +14,18 @@ var (
 	Foreground = raylib.NewColor(0, 68, 130, 255)
 )
 
-func SplashScreen(game *Game) {
-	ReadInputsSplashScreen(game)
-	UpdateSplashScreenState(game)
-	DrawSplashScreen(game)
+func SplashScreen(world *World) {
+	ReadInputsSplashScreen(world)
+	DrawSplashScreen(world)
 }
 
-func ReadInputsSplashScreen(game *Game) {
+func ReadInputsSplashScreen(world *World) {
 	if raylib.IsKeyPressed(raylib.KeySpace) {
-		InitializeGame(game)
+		InitializeGame(world)
 	}
 }
 
-func UpdateSplashScreenState(game *Game) {
-	game.Ticks++
-}
-
-func DrawSplashScreen(game *Game) {
+func DrawSplashScreen(world *World) {
 	raylib.BeginDrawing()
 	raylib.ClearBackground(Background)
 
@@ -53,8 +48,8 @@ func DrawSplashScreen(game *Game) {
 		Background,
 	)
 
-	for i := int32(0); i < 6; i++ {
-		snakeOffset := (game.Ticks/5 + i) % SplashScreenGridCount
+	for i := int64(0); i < 6; i++ {
+		snakeOffset := int32((world.Ticks/5 + i) % int64(SplashScreenGridCount))
 		gridPosition := GetOuroborosPosition(snakeOffset)
 		raylib.DrawRectangle(
 			upperLeftX+int32(gridPosition.X)*SplashScreenGridSize+1,
